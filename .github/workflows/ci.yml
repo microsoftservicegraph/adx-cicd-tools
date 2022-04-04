@@ -1,0 +1,113 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  lint-and-test-code:
+    name: Lint and test code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run style check
+        run: |
+          black scripts --check --color --diff --target-version py37
+        continue-on-error: false
+        shell: bash
+
+      - name: Run linter
+        run: |
+          prospector scripts
+        continue-on-error: false
+        shell: bash
+
+      - name: Run tests
+        run: |
+          pytest scripts
+        continue-on-error: false
+        shell: bash
+
+  validate-data:
+    name: Validate data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Validate data
+        run: |
+          python scripts/validate_data.py
+
+  upload-data:
+    name: Upload data
+    needs: [ lint-and-test-code, validate-data ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Create build version
+        id: createbuildversion
+        run:
+          echo "::set-output name=buildversion::$(date +'%y.%m%d').${{ github.run_number }}"
+
+      - name: Check build version
+        run:
+          echo "Using version ${{steps.createbuildversion.outputs.buildversion}}"
+
+      - name: Azure Login
+        if: github.event_name != 'pull_request'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_KSAPPLICATIONS_STORAGE }}
+
+      - name: Deploy
+        if: github.event_name != 'pull_request'
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.0.72
+          inlineScript: |
+              az storage blob upload --account-name ksapplications --container-name 'dictionary-data' --name "LICENSE" --file './LICENSE' --content-cache-control 'no-store max-age=0'
+              az storage blob upload --account-name ksapplications --container-name 'dictionary-data' --name "${{steps.createbuildversion.outputs.buildversion}}/LICENSE" --file './LICENSE' --content-cache-control 'no-store max-age=0'
+
+              az storage blob upload --account-name ksapplications --container-name 'dictionary-data' --name "Pāli English Dictionary-full.csv" --file './Pāli English Dictionary-full.csv' --content-cache-control 'no-store max-age=0'
+              az storage blob upload --account-name ksapplications --container-name 'dictionary-data' --name "${{steps.createbuildversion.outputs.buildversion}}/Pāli English Dictionary-full.csv" --file './Pāli English Dictionary-full.csv' --content-cache-control 'no-store max-age=0'
+
+              az storage blob upload --account-name ksapplications --container-name 'dictionary-data' --name "Pāli English Dictionary-vocab.csv" --file './Pāli English Dictionary-vocab.csv' --content-cache-control 'no-store max-age=0'
+              az storage blob upload --account-name ksapplications --container-name 'dictionary-data' --name "${{steps.createbuildversion.outputs.buildversion}}/Pāli English Dictionary-vocab.csv" --file './Pāli English Dictionary-vocab.csv' --content-cache-control 'no-store max-age=0'
+
+      - name: Azure Logout
+        if: github.event_name != 'pull_request'
+        run: |
+              az logout
+
+  finish:
+    name: Finish
+    needs: [ upload-data ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-ruby@v1
+      - name: Notify DPT on Discord
+        if: github.event_name != 'pull_request'
+        env:
+          JOB_STATUS: ${{ job.status }}
+          WEBHOOK_URL: ${{ secrets.DISCORD_DPT_DEPLOYMENT_NOTIFICATIONS_WEBHOOK_URL }}
+          HOOK_OS_NAME: ${{ runner.os }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+        run: |
+          git clone https://github.com/DiscordHooks/github-actions-discord-webhook webhook
+          bash webhook/send.sh $JOB_STATUS $WEBHOOK_URL
+        shell: bash
