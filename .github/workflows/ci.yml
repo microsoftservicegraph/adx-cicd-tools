@@ -23,7 +23,7 @@ jobs:
 
       - name: Generate app.ver
         run: |
-          echo ${{steps.createbuildversion.outputs.buildversion}} >${GITHUB_WORKSPACE}\publish\app.ver
+          echo ${{steps.createbuildversion.outputs.buildversion}} >"${{ github.workspace }}/publish/app.ver"
         shell: pwsh
 
       - name: Install necessary modules
@@ -33,20 +33,20 @@ jobs:
 
       - name: Validate module definition
         run: |
-          Test-ModuleManifest ${GITHUB_WORKSPACE}\src\adx-cicd-tools.psd1
+          Test-ModuleManifest "${{ github.workspace }}/src/adx-cicd-tools.psd1"
         shell: pwsh
 
       - name: Linting & static analysis
         run: |
-          Invoke-ScriptAnalyzer -Path ${GITHUB_WORKSPACE}\src -Recurse
+          Invoke-ScriptAnalyzer -Path "${{ github.workspace }}/src" -Recurse
         shell: pwsh
 
       - name: Test publishing processes
         env:
           POWERSHELLGALLERY_API_KEY: ${{ secrets.POWERSHELLGALLERY_API_KEY }}
         run: |
-          $publishPath = ${GITHUB_WORKSPACE}\publish\adx-cicd-tools
-          xcopy /frys ${GITHUB_WORKSPACE}\src "$publishPath\"
+          $publishPath = "${{ github.workspace }}/publish/adx-cicd-tools"
+          xcopy /frys "${{ github.workspace }}/src" "$publishPath/"
           Publish-Module -Path $publishPath -NuGetApiKey $env:POWERSHELLGALLERY_API_KEY -Verbose -WhatIf
         shell: pwsh
 

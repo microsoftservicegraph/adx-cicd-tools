@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate app.ver
         run: |
-          echo ${{steps.createbuildversion.outputs.buildversion}} >${GITHUB_WORKSPACE}\publish\app.ver
+          echo ${{steps.createbuildversion.outputs.buildversion}} >"${{ github.workspace }}/publish/app.ver"
         shell: pwsh
 
       - name: Publish Module
@@ -32,8 +32,8 @@ jobs:
         env:
           POWERSHELLGALLERY_API_KEY: ${{ secrets.POWERSHELLGALLERY_API_KEY }}
         run: |
-          $publishPath = ${GITHUB_WORKSPACE}\publish\adx-cicd-tools
-          xcopy /frys ${GITHUB_WORKSPACE}\src "$publishPath\"
+          $publishPath = ${{ github.workspace }}/publish/adx-cicd-tools
+          xcopy /frys ${{ github.workspace }}/src "$publishPath/"
           Publish-Module -Path $publishPath -NuGetApiKey $env:POWERSHELLGALLERY_API_KEY -Verbose -WhatIf
         shell: pwsh
 
