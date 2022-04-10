@@ -118,7 +118,7 @@ function PreProcessCommand {
       return
     }
 
-    Write-Log -Level INFO -Message ""
+    Write-Log -Level INFO -Message " "
     Write-Log -Level INFO -Message "Executing: $Command"
   }
 }
