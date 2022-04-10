@@ -6,6 +6,8 @@ Bunch of PowerShell based tools for Continuos Integration, Continuos Testing, & 
 
 ## Common commands
 
+### Building PowerShell Module
+
 - Install dependencies
   ```
   Install-Module -Name Logging -RequiredVersion 4.8.5 -Force
@@ -23,6 +25,24 @@ Bunch of PowerShell based tools for Continuos Integration, Continuos Testing, & 
   ```
   xcopy /frys .\src .\publish\adx-cicd-tools\
   Publish-Module -Path D:\src\gh\adx\publish\adx-cicd-tools -NuGetApiKey $nuGetApiKey -Verbose -WhatIf
+  ```
+
+### Testing PowerShell Module
+
+- Clear database
+  ```
+  cd sample
+  Import-Module ..\src\adx-cicd-tools.psd1 -Force
+  Clear-ADXDatabase -Cluster 'adxcicdtools.germanywestcentral.kusto.windows.net' -Database 'testdb' -Exclude @()
+  ```
+- Deploy database schema
+  ```
+  ```
+- Build database
+  ```
+  ```
+- Test database
+  ```
   ```
 
 ## Backlog
