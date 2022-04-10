@@ -26,19 +26,22 @@ jobs:
           echo ${{steps.createbuildversion.outputs.buildversion}} >"${{ github.workspace }}\publish\app.ver"
         shell: pwsh
 
-      - name: Install necessary modules
+      - name: Install dependencies
         run: |
-          Install-Module -Name PSScriptAnalyzer -Force
+          Install-Module -Name Logging -RequiredVersion 4.8.5 -Force
+          Install-Module -Name PSScriptAnalyzer -RequiredVersion 1.20.0 -Force
         shell: pwsh
 
       - name: Validate module definition
         run: |
-          Test-ModuleManifest "${{ github.workspace }}\src\adx-cicd-tools.psd1"
+          Test-ModuleManifest "${{ github.workspace }}\src\adx-cicd-tools.psd1" | Format-List
         shell: pwsh
 
       - name: Linting & static analysis
         run: |
-          Invoke-ScriptAnalyzer -Path "${{ github.workspace }}\src" -Recurse
+          $issues = @()
+          Invoke-ScriptAnalyzer -Path "${{ github.workspace }}\src" -Recurse | Tee-Object -Variable issues
+          if ($issues) { throw "PSScriptAnalyzer has detected $($issues.Length) issue(s)." }
         shell: pwsh
 
       - name: Test publishing processes

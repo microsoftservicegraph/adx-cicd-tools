@@ -1,0 +1,6 @@
+.create-merge table Products
+(
+    Id: guid,
+    Name: string,
+)
+with (docstring = @"Product definition", folder = @"CoreEntities" )

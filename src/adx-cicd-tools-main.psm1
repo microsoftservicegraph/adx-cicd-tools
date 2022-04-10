@@ -1,7 +1,12 @@
 #Requires -PSEdition Core
 
+Set-LoggingDefaultLevel -Level INFO
+Set-LoggingDefaultFormat '[%{timestamp:+%Y-%m-%d %T}] [%{level:-7}] %{message}'
+Add-LoggingTarget -Name Console
+
+
 $adxToolsDir = "$env:APPDATA\..\Local\adxTools"
-$KustoCli = "$adxToolsDir\kcli\kusto.cli.exe"
+$KustoCliExePath = "$adxToolsDir\kcli\kusto.cli.exe"
 
 function GetOrDownloadCli {
   [CmdletBinding()]
@@ -12,7 +17,7 @@ function GetOrDownloadCli {
 
   Process {
     if (-not (Test-Path $CliPath)) {
-      Write-Host -ForegroundColor Green "$(Split-Path -Leaf $CliPath) not found. downloading..."
+      Write-Log -Level INFO -Message "$(Split-Path -Leaf $CliPath) not found. downloading..."
       $tempFile = "$env:TEMP\$((New-TemporaryFile).Name).zip"
       Invoke-WebRequest -Uri $CliZipUri -OutFile $tempFile
 
@@ -20,12 +25,12 @@ function GetOrDownloadCli {
       Expand-Archive -LiteralPath $tempFile -DestinationPath $adxToolsDir -Force
     }
 
-    Write-Host -ForegroundColor DarkGray "Using $CliPath"
+    Write-Log -Level INFO -Message "Using {0}" -Arguments $CliPath
     $CliPath
   }
 }
 
 # Download the CLIs if it does not exist.
-GetOrDownloadCli "https://msgpublictools.blob.core.windows.net/tools/kcli.zip" $KustoCli
+GetOrDownloadCli "https://msgpublictools.blob.core.windows.net/tools/kcli.zip" $KustoCliExePath
 
-Export-ModuleMember -Variable KustoCli
+Export-ModuleMember -Variable KustoCliExePath

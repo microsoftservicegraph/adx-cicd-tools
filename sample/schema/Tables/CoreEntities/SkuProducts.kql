@@ -1,0 +1,6 @@
+.create-merge table SkuProducts
+(
+    Id: guid,
+    Name: string,
+)
+with (docstring = @"SKU to Products mapping. Has no meaning", folder = @"." )

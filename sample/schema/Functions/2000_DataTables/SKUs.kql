@@ -1,0 +1,13 @@
+.create-or-alter function with(
+    docstring = @"Get list of M365 SKUs.",
+    folder = @"2000_DataTables")
+    SKUs()
+{
+    let mapping = datatable(Name: string, Id: guid)
+    [
+        "Microsoft 365 E3", guid(05e9a617-0261-4cee-bb44-138d3ef5d965),
+        "Microsoft 365 E5", guid(06ebc4ee-1bb5-47dd-8120-11324bc54e06),
+    ]
+    ;
+    mapping
+}
