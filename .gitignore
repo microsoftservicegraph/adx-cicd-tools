@@ -3,7 +3,7 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# Service Graph specific files
+# Project specific files
 .paket/
 .fake/
 ServiceGraph.*.json
@@ -13,6 +13,7 @@ msbuildlogs.*
 *.test-results.xml
 package-lock.json
 *.received.txt
+publish/
 
 # User-specific files
 *.recieved.csv

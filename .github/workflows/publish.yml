@@ -4,77 +4,47 @@ on:
   workflow_dispatch
 
 jobs:
-  build-dictionaries:
-    name: Build dictionaries
-    runs-on: ubuntu-latest
+  publish-module:
+    name: Publish Module
+    runs-on: windows-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get install unzip dictzip p7zip-full
-
       - name: Create build version
         id: createbuildversion
-        run:
+        run: |
           echo "::set-output name=buildversion::$(date +'%y.%m%d').${{ github.run_number }}"
+        shell: pwsh
 
       - name: Check build version
-        run:
+        run: |
           echo "Using version ${{steps.createbuildversion.outputs.buildversion}}"
+        shell: pwsh
 
-      - name: Make version directory
-        run:
-          mkdir ${{steps.createbuildversion.outputs.buildversion}}
-
-      - name: Download dictionary tools
+      - name: Generate app.ver
         run: |
-          sudo chmod +x update.sh
-          cd ${{steps.createbuildversion.outputs.buildversion}}
-          ../update.sh ${{steps.createbuildversion.outputs.buildversion}}
+          echo ${{steps.createbuildversion.outputs.buildversion}} >./publish/app.ver
+        shell: pwsh
 
-      - name: Build dictionaries
+      - name: Publish Module
+        if: github.event_name != 'pull_request'
+        env:
+          POWERSHELLGALLERY_API_KEY: ${{ secrets.POWERSHELLGALLERY_API_KEY }}
         run: |
-          sudo chmod +x makedict.sh
-          cd ${{steps.createbuildversion.outputs.buildversion}}
-          ../makedict.sh ${{steps.createbuildversion.outputs.buildversion}}
-
-      - name: Azure Login
-        if: github.event_name != 'pull_request'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS_KSAPPLICATIONS_STORAGE }}
-
-      - name: Deploy files
-        if: github.event_name != 'pull_request'
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.0.72
-          inlineScript: |
-              az storage blob upload-batch --account-name ksapplications -d "dictionary/${{steps.createbuildversion.outputs.buildversion}}" -s "${{steps.createbuildversion.outputs.buildversion}}"
-
-      - name: Deploy LICENSE
-        if: github.event_name != 'pull_request'
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.0.72
-          inlineScript: |
-              az storage blob upload --account-name ksapplications --container-name 'dictionary' --name "LICENSE" --file './LICENSE' --content-cache-control 'no-store max-age=0'
-              az storage blob upload --account-name ksapplications --container-name 'dictionary' --name "${{steps.createbuildversion.outputs.buildversion}}/LICENSE" --file './LICENSE' --content-cache-control 'no-store max-age=0'
-
-      - name: Azure Logout
-        if: github.event_name != 'pull_request'
-        run: |
-              az logout
+          xcopy /frys .\src .\publish\adx-cicd-tools\
+          Publish-Module -Path D:\src\gh\adx\publish\adx-cicd-tools -NuGetApiKey $env:POWERSHELLGALLERY_API_KEY -Verbose -WhatIf
+        shell: pwsh
 
       - name: Create Tag
+        if: github.event_name != 'pull_request'
         uses: tvdias/github-tagger@v0.0.1
         with:
           tag: ${{steps.createbuildversion.outputs.buildversion}}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release
+        if: github.event_name != 'pull_request'
         uses: ncipollo/release-action@v1
         with:
           tag: ${{steps.createbuildversion.outputs.buildversion}}
@@ -84,18 +54,17 @@ jobs:
 
   finish:
     name: Finish
-    needs: [ build-dictionaries ]
+    needs: [ publish-module ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-ruby@v1
-      - name: Notify DPT on Discord
+      - name: Send notification
         if: github.event_name != 'pull_request'
         env:
           JOB_STATUS: ${{ job.status }}
-          WEBHOOK_URL: ${{ secrets.DISCORD_DPT_DEPLOYMENT_NOTIFICATIONS_WEBHOOK_URL }}
           HOOK_OS_NAME: ${{ runner.os }}
           WORKFLOW_NAME: ${{ github.workflow }}
         run: |
-          git clone https://github.com/DiscordHooks/github-actions-discord-webhook webhook
-          bash webhook/send.sh $JOB_STATUS $WEBHOOK_URL
-        shell: bash
+          echo "Job status: $env:JOB_STATUS"
+          echo "Hook os name: $env:HOOK_OS_NAME"
+          echo "Workflow name: $env:WORKFLOW_NAME"
+        shell: pwsh
