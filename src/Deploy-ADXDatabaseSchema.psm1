@@ -13,6 +13,10 @@ function RunScripts
   )
 
   Process {
+    if (!$Scripts.Length) {
+      continue
+    }
+
     $Scripts | ForEach-Object { $totalActions = $Scripts.Length; $completedActions = 0 } {
       $_ | ExecuteKustoScript $Cluster $Database $Auth -WhatIf:$WhatIf -Verbose:$Verbose
 
