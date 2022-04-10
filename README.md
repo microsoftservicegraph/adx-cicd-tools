@@ -29,21 +29,7 @@ Bunch of PowerShell based tools for Continuos Integration, Continuos Testing, & 
 
 ### Testing PowerShell Module
 
-- Clear database
-  ```
-  cd sample
-  Import-Module ..\src\adx-cicd-tools.psd1 -Force
-  Clear-ADXDatabase -Cluster 'adxcicdtools.germanywestcentral.kusto.windows.net' -Database 'testdb' -Exclude @()
-  ```
-- Deploy database schema
-  ```
-  ```
-- Build database
-  ```
-  ```
-- Test database
-  ```
-  ```
+See [Sample](./sample/README.md) README.
 
 ## Backlog
 

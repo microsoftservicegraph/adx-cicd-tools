@@ -1,0 +1,3 @@
+.set-or-append Version <|
+    Version
+    | where Database == '?'

@@ -1,0 +1,5 @@
+.set-or-replace SkuProducts <|
+    SKUs
+    | sort by Name
+    | extend rn = row_number(0)
+    | project Id = GenerateGUID(Name, "", "", rn), Name = strcat(Name, " - ", rn)

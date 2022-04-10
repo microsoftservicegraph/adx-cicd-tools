@@ -38,7 +38,7 @@ $functionScriptTesterRegex = "^.*\\Functions\\.*\.kql$"
 .LINK
   https://github.com/microsoftservicegraph/adx-cicd-tools
 .EXAMPLE
-  Deploy-ADXDatabaseSchema -Verbose
+  Deploy-ADXDatabaseSchema -Cluster 'adxcicdtools.germanywestcentral.kusto.windows.net' -Database 'testdb' -SchemaScriptsFolder .\schema\
 #>
 function Deploy-ADXDatabaseSchema {
   [CmdletBinding()]

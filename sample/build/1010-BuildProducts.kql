@@ -1,0 +1,3 @@
+.set-or-replace Products <|
+    SkuProducts
+    | extend Name = strcat(Name, ' - Product')

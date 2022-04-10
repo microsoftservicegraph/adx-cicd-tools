@@ -64,7 +64,7 @@ function NukeEntities
 .LINK
   https://github.com/microsoftservicegraph/adx-cicd-tools
 .EXAMPLE
-  Clear-ADXDatabase -Cluster "" -
+  Clear-ADXDatabase -Cluster 'adxcicdtools.germanywestcentral.kusto.windows.net' -Database 'testdb' -Exclude @() -Verbose
 #>
 function Clear-ADXDatabase {
   [CmdletBinding()]
