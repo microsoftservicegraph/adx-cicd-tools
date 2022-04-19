@@ -9,6 +9,7 @@ Starter kit for ADX CI/CD Tools.
 - Prepare
   ```
   cd sample
+  Install-Module -Name Logging -RequiredVersion 4.8.5 -Force
   Import-Module ..\src\adx-cicd-tools.psd1 -Force
   ```
 - Clear database
