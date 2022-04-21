@@ -39,7 +39,7 @@ function Build-ADXDatabase {
 
     Write-Progress -Id 0 -Activity "Building ADX Database..." -Status "Running build scripts..." -PercentComplete 0
 
-    $scripts = Get-ChildItem $BuildScriptsFolder -Recurse -Filter "*.kql" | Sort-Object -Property Name
+    $scripts = Get-ChildItem $BuildScriptsFolder -Recurse -Filter "*.kql" | Sort-Object -Property Directory,Name
     $scripts | ForEach-Object { $totalActions = $scripts.Length + 1; $completedActions = 0 } {
       $script = $_
       if (($Exclude | Where-Object { $script -Like $_ }).Length -ne 0) {
