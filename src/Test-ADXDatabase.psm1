@@ -56,7 +56,7 @@ function Test-ADXDatabase {
   )
 
   Process {
-    $scripts = Get-ChildItem $TestScriptsFolder -Recurse -Filter "$Filter.test.kql" | Sort-Object -Property Name
+    $scripts = Get-ChildItem $TestScriptsFolder -Recurse -Filter "$Filter.test.kql" | Sort-Object -Property Directory,Name
 
     $totalTests = $scripts.Count
     $passedTests = 0
