@@ -1,2 +1,2 @@
-"Environment","Cluster","Database"
-"adxcicdtools.germanywestcentral.kusto.windows.net","adxcicdtools.germanywestcentral.kusto.windows.net","testdb"
+"Cluster","Database"
+"adxcicdtools.germanywestcentral.kusto.windows.net","testdb"
