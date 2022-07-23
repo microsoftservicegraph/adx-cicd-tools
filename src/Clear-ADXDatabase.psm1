@@ -15,6 +15,7 @@ function NukeEntities
     $Cluster
     , $Database
     , $Auth
+    , $Exclude
     , $ProgressId
     , $Entity
   )
@@ -85,9 +86,9 @@ function Clear-ADXDatabase {
     Write-Log -Level INFO -Message "WhatIf    : $WhatIf"
 
     Write-Progress -Id 0 -Activity "Clearing functions..." -PercentComplete 0
-    NukeEntities $Cluster $Database $Auth 1 "Function"
+    NukeEntities $Cluster $Database $Auth $Exclude 1 "Function"
     Write-Progress -Id 0 -Activity "Clearing tables..." -PercentComplete 50
-    NukeEntities $Cluster $Database $Auth 2 "Table"
+    NukeEntities $Cluster $Database $Auth $Exclude 2 "Table"
 
     Write-Log -Level INFO -Message "Clear-ADXDatabase done!"
   }
